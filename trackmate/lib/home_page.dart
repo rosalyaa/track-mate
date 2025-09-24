@@ -4,6 +4,7 @@ import 'package:trackmate/service/auth_service.dart';
 import 'package:trackmate/ui/buses_page/buses_page.dart';
 import 'package:trackmate/ui/dashboard_page/dashboard_page.dart';
 import 'package:trackmate/ui/drivers_page/drivers_page.dart';
+
 import 'package:trackmate/ui/student_page/student_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -19,10 +20,10 @@ class _HomePageState extends State<HomePage> {
   final AuthService _authService = AuthService();
 
   // Pages for right-side content
-  final List<Widget> _pages = const [
-    DashboardPage(),
+  final List<Widget> _pages =  [
+    const DashboardPage(),
     StudentsPage(),
-    DriversPage(),
+    const DriversPage(),
     BusesPage(),
   ];
 
