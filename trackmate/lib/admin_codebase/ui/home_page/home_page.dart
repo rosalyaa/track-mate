@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:trackmate/service/auth_service.dart';
+import 'package:trackmate/admin_codebase/service/auth_service.dart';
 
-import 'package:trackmate/ui/buses_page/buses_page.dart';
-import 'package:trackmate/ui/dashboard_page/dashboard_page.dart';
-import 'package:trackmate/ui/drivers_page/drivers_page.dart';
+import 'package:trackmate/admin_codebase/ui/buses_page/buses_page.dart';
+import 'package:trackmate/admin_codebase/ui/dashboard_page/dashboard_page.dart';
+import 'package:trackmate/admin_codebase/ui/drivers_page/drivers_page.dart';
 
-import 'package:trackmate/ui/student_page/student_page.dart';
+import 'package:trackmate/admin_codebase/ui/student_page/student_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
