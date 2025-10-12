@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:trackmate/admin_codebase/ui/login/login_page.dart';
+import 'package:trackmate/login_page.dart';
 import 'firebase_options.dart';
 
 
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     print("main");
     return MaterialApp
     (
-      title: 'TrackMate - Admin',
+      title: 'TrackMate ',
       theme: ThemeData(primarySwatch: Colors.indigo),
       home: const LoginPage(),
     );

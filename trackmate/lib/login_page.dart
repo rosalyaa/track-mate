@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:trackmate/admin_codebase/service/auth_service.dart';
+import 'package:trackmate/admin_codebase/ui/student_page/student_page.dart';
+import 'package:trackmate/driver_codebase/ui/drivers_app.dart';
+import 'package:trackmate/student_codebase/ui/student_page.dart';
 
-import '../home_page/home_page.dart';
+import 'admin_codebase/ui/home_page/home_page.dart'; 
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,16 +21,44 @@ class _LoginPageState extends State<LoginPage> {
   bool _loading = false;
   String? _error;
 
+  // Dummy credentials
+  final String driverEmail = "driver@sxcce.com";
+  final String driverPassword = "driver123";
+
+  final String studentEmail = "student@sxcce.com";
+  final String studentPassword = "student123";
+
   void _login() async {
     setState(() {
       _loading = true;
       _error = null;
     });
 
-    final user = await _authService.signInWithEmailAndPassword(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-    );
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // 1. Check if matches dummy Driver credentials
+    if (email == driverEmail && password == driverPassword) {
+      setState(() => _loading = false);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const DriverHomePage()),
+      );
+      return;
+    }
+
+    // 2. Check if matches dummy Student credentials
+    if (email == studentEmail && password == studentPassword) {
+      setState(() => _loading = false);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const StudentHomePage()),
+      );
+      return;
+    }
+
+    // 3. Else, try Admin login via AuthService
+    final user = await _authService.signInWithEmailAndPassword(email, password);
 
     setState(() {
       _loading = false;
@@ -36,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
     if (user != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
+        MaterialPageRoute(builder: (_) => const HomePage()), // Admin panel
       );
     } else {
       setState(() {
@@ -48,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Admin Login")),
+      appBar: AppBar(title: const Text("Login")),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -65,7 +96,8 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             if (_loading) const CircularProgressIndicator(),
-            if (_error != null) Text(_error!, style: const TextStyle(color: Colors.red)),
+            if (_error != null)
+              Text(_error!, style: const TextStyle(color: Colors.red)),
             ElevatedButton(
               onPressed: _login,
               child: const Text("Login"),
