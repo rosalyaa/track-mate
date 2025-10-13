@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:trackmate/admin_codebase/service/driver_management/driver_firestore.dart';
 
 class DriversPage extends StatefulWidget {
   const DriversPage({super.key});
@@ -16,8 +18,36 @@ class _DriversPageState extends State<DriversPage> {
   final TextEditingController _phoneController = TextEditingController();
 
   String? _selectedBus;
-  List<String> buses = ["Bus 1", "Bus 2", "Bus 3"]; 
-  // TODO: Fetch this list from Firestore (bus collection)
+  final DriverFirestoreService _driverService = DriverFirestoreService();
+
+  List<String> buses = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBuses();
+  }
+
+  void _fetchBuses() {
+    _driverService.getBuses().listen((snapshot) {
+      List<String> fetchedBuses = [];
+      for (var doc in snapshot.docs) {
+        var bus = doc.data() as Map<String, dynamic>;
+        if (bus['busNumber'] != null) fetchedBuses.add(bus['busNumber']);
+      }
+      setState(() {
+        buses = fetchedBuses;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _idController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +63,7 @@ class _DriversPageState extends State<DriversPage> {
                 icon: const Icon(Icons.add),
                 label: const Text("Create"),
                 onPressed: () {
-                  setState(() {
-                    showCreateForm = true;
-                  });
+                  setState(() => showCreateForm = true);
                 },
               ),
               const SizedBox(width: 10),
@@ -43,16 +71,13 @@ class _DriversPageState extends State<DriversPage> {
                 icon: const Icon(Icons.visibility),
                 label: const Text("View"),
                 onPressed: () {
-                  setState(() {
-                    showCreateForm = false;
-                  });
+                  setState(() => showCreateForm = false);
                 },
               ),
             ],
           ),
           const SizedBox(height: 20),
 
-          // Page content
           Expanded(
             child: showCreateForm ? _buildCreateForm() : _buildViewPage(),
           ),
@@ -61,7 +86,7 @@ class _DriversPageState extends State<DriversPage> {
     );
   }
 
-  /// Create Driver Form
+  /// --- CREATE FORM ---
   Widget _buildCreateForm() {
     return SingleChildScrollView(
       child: Card(
@@ -105,16 +130,6 @@ class _DriversPageState extends State<DriversPage> {
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 15),
-
-              // Photo Upload (placeholder)
-              ElevatedButton.icon(
-                icon: const Icon(Icons.photo),
-                label: const Text("Upload Photo"),
-                onPressed: () {
-                  // TODO: integrate image picker
-                },
-              ),
-              const SizedBox(height: 20),
 
               // Bus Assigned Dropdown
               DropdownButtonFormField<String>(
@@ -160,38 +175,7 @@ class _DriversPageState extends State<DriversPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
                 ),
-                onPressed: () {
-                  final id = _idController.text.trim();
-                  final name = _nameController.text.trim();
-                  final phone = _phoneController.text.trim();
-                  final bus = _selectedBus;
-
-                  if (id.isEmpty || name.isEmpty || phone.isEmpty || bus == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Please fill all fields")),
-                    );
-                    return;
-                  }
-
-                  final username = "$id@sxcce";
-                  final password = id;
-
-                  // TODO: Save driver to Firestore
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        "Driver $name created (Bus: $bus, Username: $username, Password: $password)",
-                      ),
-                    ),
-                  );
-
-                  _idController.clear();
-                  _nameController.clear();
-                  _phoneController.clear();
-                  setState(() {
-                    _selectedBus = null;
-                  });
-                },
+                onPressed: _createDriver,
                 child: const Text("Create Driver"),
               ),
             ],
@@ -201,13 +185,100 @@ class _DriversPageState extends State<DriversPage> {
     );
   }
 
-  /// View Driver List (later fetch from Firestore)
+  /// --- CREATE DRIVER LOGIC ---
+  Future<void> _createDriver() async {
+    final id = _idController.text.trim();
+    final name = _nameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final bus = _selectedBus;
+
+    if (id.isEmpty || name.isEmpty || phone.isEmpty || bus == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all fields")),
+      );
+      return;
+    }
+
+    final username = "$id@sxcce";
+    final password = id;
+
+    try {
+      await _driverService.addDriver(
+        driverId: id,
+        name: name,
+        phoneNumber: phone,
+        username: username,
+        password: password,
+        busAssigned: bus,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Driver $name added successfully")),
+      );
+
+      _idController.clear();
+      _nameController.clear();
+      _phoneController.clear();
+      setState(() {
+        _selectedBus = null;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
+  }
+
+  /// --- VIEW DRIVERS ---
   Widget _buildViewPage() {
-    return const Center(
-      child: Text(
-        "List of Drivers will appear here",
-        style: TextStyle(fontSize: 18, color: Colors.grey),
-      ),
+    return StreamBuilder<QuerySnapshot>(
+      stream: _driverService.getDrivers(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(
+            child: Text("No drivers found",
+                style: TextStyle(fontSize: 18, color: Colors.grey)),
+          );
+        }
+
+        final drivers = snapshot.data!.docs;
+
+        return ListView.builder(
+          itemCount: drivers.length,
+          itemBuilder: (context, index) {
+            var driver = drivers[index].data() as Map<String, dynamic>;
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              child: ListTile(
+                title: Text(driver['name'] ?? ''),
+                subtitle: Text(
+                    "ID: ${driver['driverId']} | Phone: ${driver['phoneNumber']} | Bus: ${driver['busAssigned']}"),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () async {
+                    try {
+                      await _driverService.deleteDriver(driver['driverId']);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                "Driver ${driver['name']} deleted successfully")),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Error: $e")),
+                      );
+                    }
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
