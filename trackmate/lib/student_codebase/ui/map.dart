@@ -110,7 +110,8 @@ class _MapPageState extends State<MapPage> {
           markerId: const MarkerId('student'),
           position: _studentLocation!,
           infoWindow: const InfoWindow(title: "Your Pinned Location"),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
         ),
       );
     }
@@ -164,9 +165,9 @@ class _MapPageState extends State<MapPage> {
       );
     }
 
-    // Choose initial camera target
+    // Choose initial  target
     final LatLng initialTarget =
-        _studentLocation ?? _busLocation ?? const LatLng(8.19421, 77.38513);
+        _studentLocation ?? _busLocation ?? const LatLng(0, 0);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Bus Tracking")),

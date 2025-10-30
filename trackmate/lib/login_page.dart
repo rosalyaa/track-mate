@@ -13,14 +13,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  // Controllers
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  // Services
   final AuthService _authService = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // State variables
   bool _loading = false;
   String? _error;
+  bool _isDarkMode = false;
 
+  // -------------------- LOGIN FUNCTION --------------------
   void _login() async {
     setState(() {
       _loading = true;
@@ -31,15 +37,17 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text.trim();
 
     try {
-      // -------------------- STUDENT LOGIN --------------------
+      // STUDENT LOGIN
       final studentQuery = await _firestore.collection('students').get();
 
-      final matchedStudentList = studentQuery.docs.where(
-        (doc) =>
-            (doc.data()['username'] ?? '').toString().toLowerCase() ==
-                email.toLowerCase() &&
-            (doc.data()['password'] ?? '').toString() == password,
-      ).toList();
+      final matchedStudentList = studentQuery.docs
+          .where(
+            (doc) =>
+                (doc.data()['username'] ?? '').toString().toLowerCase() ==
+                    email.toLowerCase() &&
+                (doc.data()['password'] ?? '').toString() == password,
+          )
+          .toList();
 
       if (matchedStudentList.isNotEmpty) {
         final matchedStudent = matchedStudentList.first;
@@ -47,21 +55,24 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => StudentHomePage(username: matchedStudent.data()['username']),
+            builder: (_) =>
+                StudentHomePage(username: matchedStudent.data()['username']),
           ),
         );
         return;
       }
 
-      // -------------------- DRIVER LOGIN --------------------
+      // DRIVER LOGIN
       final driverQuery = await _firestore.collection('drivers').get();
 
-      final matchedDriverList = driverQuery.docs.where(
-        (doc) =>
-            (doc.data()['username'] ?? '').toString().toLowerCase() ==
-                email.toLowerCase() &&
-            (doc.data()['password'] ?? '').toString() == password,
-      ).toList();
+      final matchedDriverList = driverQuery.docs
+          .where(
+            (doc) =>
+                (doc.data()['username'] ?? '').toString().toLowerCase() ==
+                    email.toLowerCase() &&
+                (doc.data()['password'] ?? '').toString() == password,
+          )
+          .toList();
 
       if (matchedDriverList.isNotEmpty) {
         final matchedDriver = matchedDriverList.first;
@@ -75,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      // -------------------- ADMIN LOGIN --------------------
+      // ADMIN LOGIN
       final adminUser =
           await _authService.signInWithEmailAndPassword(email, password);
 
@@ -91,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      // -------------------- INVALID LOGIN --------------------
+      // INVALID LOGIN
       setState(() {
         _error = "Invalid username or password!";
       });
@@ -103,58 +114,107 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // -------------------- UI BUILD --------------------
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+    final theme = _isDarkMode ? ThemeData.dark() : ThemeData.light();
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: theme,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("Welcome to TrackMate"),
+          centerTitle: true,
+          actions: [
+            Row(
               children: [
-                const Icon(Icons.lock, size: 80, color: Colors.deepPurple),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: "Username / Email",
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
-                  ),
-                ),
-                const SizedBox(height: 15),
-                TextField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: "Password",
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
-                  ),
-                  obscureText: true,
-                ),
-                const SizedBox(height: 20),
-                if (_loading) const CircularProgressIndicator(),
-                if (_error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(_error!,
-                        style: const TextStyle(color: Colors.red)),
-                  ),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _login,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 15)),
-                    child: const Text("Login",
-                        style: TextStyle(fontSize: 18)),
-                  ),
+                Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode),
+                Switch(
+                  value: _isDarkMode,
+                  onChanged: (value) {
+                    setState(() {
+                      _isDarkMode = value;
+                    });
+                  },
                 ),
               ],
+            ),
+          ],
+          backgroundColor: _isDarkMode
+              ? Colors.black87
+              : const Color.fromARGB(255, 130, 24, 24),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // 🚌 Image above text
+                  Image.asset(
+                    'assets/bus.png',
+                    height: 120,
+                  ),
+                  const SizedBox(height: 20),
+
+                  const Text(
+                    "Welcome to TrackMate",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 130, 24, 24),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+
+                  TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      labelText: "Username / Email",
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.person),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+
+                  TextField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
+                      labelText: "Password",
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.lock),
+                    ),
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 20),
+
+                  if (_loading) const CircularProgressIndicator(),
+                  if (_error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(_error!,
+                          style: const TextStyle(color: Colors.red)),
+                    ),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _login,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color.fromARGB(255, 130, 24, 24),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                      ),
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

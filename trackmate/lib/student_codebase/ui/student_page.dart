@@ -18,9 +18,6 @@ class _StudentHomePageState extends State<StudentHomePage> {
   LatLng? pinnedLocation;
   bool loading = true;
 
-  // Fixed location coordinates
-  static const double fixedLat = 8.19421;
-  static const double fixedLng = 77.38513;
 
   @override
   void initState() {
@@ -49,16 +46,16 @@ class _StudentHomePageState extends State<StudentHomePage> {
     }
   }
 
-  /// Pin the fixed location (on button press)
+  /// Pin the  location (on button press)
   Future<void> _pinLocation() async {
     if (studentData == null) return;
 
     setState(() {
-      pinnedLocation = const LatLng(fixedLat, fixedLng);
+      pinnedLocation = const LatLng(lat, lng);
     });
 
-    // Save the fixed location in Firestore
-    await _firestoreService.pinFixedLocation(studentData!['rollNumber']);
+    // Save the  location in Firestore
+    await _firestoreService.pinLocation(studentData!['rollNumber']);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Location successfully pinned!")),
@@ -132,7 +129,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                         icon: const Icon(Icons.map),
                         label: const Text("View on Map"),
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurpleAccent),
+                            backgroundColor: Color.fromARGB(255, 230, 230, 232)),
                       ),
                     ],
                   ),
@@ -174,4 +171,210 @@ class _StudentHomePageState extends State<StudentHomePage> {
       ),
     );
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  //  location coordinates
+  static const double lat = 8.19421;
+  static const double lng = 77.38513;
 }

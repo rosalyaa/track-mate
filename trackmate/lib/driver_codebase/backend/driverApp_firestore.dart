@@ -3,9 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class DriverFirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Fixed location
-  static const double fixedLat = 8.19410;
-  static const double fixedLng = 77.38510;
+
 
   /// Fetch driver details by driverId
   Future<Map<String, dynamic>?> getDriverById(String driverId) async {
@@ -43,36 +41,36 @@ class DriverFirestoreService {
     }
   }
 
-  /// Pin driver location (always fixed)
-  Future<void> pinFixedLocation(String driverId) async {
+  /// Pin driver location 
+  Future<void> pinLocation(String driverId) async {
     try {
       await _firestore.collection('drivers').doc(driverId).set({
-        'lat': fixedLat,
-        'lng': fixedLng,
+        'lat': lat,
+        'lng': lng,
       }, SetOptions(merge: true));
 
       print(
-          "Driver location pinned to fixed coordinates: $fixedLat, $fixedLng");
+          "Driver location pinned : $lat, $lng");
     } catch (e) {
       print("Error pinning driver location: $e");
     }
   }
 
-  /// Update bus location (always fixed)
+  /// Update bus location 
   Future<void> updateBusLocation(String busNumber) async {
     try {
       await _firestore.collection('buses').doc(busNumber).set({
-        'lat': fixedLat,
-        'lng': fixedLng,
+        'lat': lat,
+        'lng': lng,
       }, SetOptions(merge: true));
 
-      print("Bus location updated to fixed coordinates: $fixedLat, $fixedLng");
+      print("Bus location updated: $lat, $lng");
     } catch (e) {
       print("Error updating bus location: $e");
     }
   }
 
-  /// Update all students in a bus with driver location (always fixed)
+  /// Update all students in a bus with driver location
   Future<void> updateStudentsLocation(String busNumber) async {
     try {
       final studentsSnapshot = await _firestore
@@ -82,15 +80,191 @@ class DriverFirestoreService {
 
       for (var student in studentsSnapshot.docs) {
         await student.reference.update({
-          'driverLat': fixedLat,
-          'driverLng': fixedLng,
+          'driverLat': lat,
+          'driverLng': lng,
         });
       }
 
       print(
-          "All students updated with fixed driver location: $fixedLat, $fixedLng");
+          "All students updated with driver location: $lat, $lng");
     } catch (e) {
       print("Error updating students location: $e");
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   const double lat = 8.19410;
+   const double lng = 77.38510;

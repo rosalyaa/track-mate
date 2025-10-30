@@ -31,13 +31,13 @@ class _DriverHomePageState extends State<DriverHomePage> {
     if (data != null) setState(() => driverData = data);
   }
 
-  Future<void> _pinFixedLocation() async {
+  Future<void> _pinLocation() async {
     if (driverData == null) return;
 
     String busNumber = driverData!['busAssigned'];
 
-    // Update driver, bus, and students with fixed location
-    await _driverService.pinFixedLocation(widget.driverId);
+    // Update driver, bus, and students with  location
+    await _driverService.pinLocation(widget.driverId);
     await _driverService.updateBusLocation(busNumber);
     await _driverService.updateStudentsLocation(busNumber);
 
@@ -45,14 +45,14 @@ class _DriverHomePageState extends State<DriverHomePage> {
       locationStatus = "Location successfully shared!";
     });
 
-    print("Fixed location pinned for driver, bus, and students.");
+    print("location pinned for driver, bus, and students.");
   }
 
   void _toggleSharing() {
     setState(() => isSharing = !isSharing);
 
     if (isSharing) {
-      _pinFixedLocation();
+      _pinLocation();
     } else {
       setState(() => locationStatus = "Location not shared");
     }
