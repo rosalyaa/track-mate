@@ -109,7 +109,7 @@ Through this project I learned:
 - To strengthen debugging, version control (Git/GitHub), and software development skills.
 
 
-Author: Rosalya Gabriel,
-        Computer Science Engineering Student
+Authors: Rinu S L, Sharmi R, Rosalya G
+        
 
 GitHub: https://github.com/rosalyaa
